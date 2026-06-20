@@ -1,9 +1,24 @@
 from PIL import Image
+from typing import Optional
 
-def crop_ui_elements(image_path, output_path, top_percent=12, bottom_percent=12):
+
+def crop_ui_elements(
+    image_path: str,
+    output_path: str,
+    top_percent: float = 12,
+    bottom_percent: float = 12
+) -> str:
     """
     Rogne l'image pour enlever les barres d'interface (statut, navigation).
-    Par défaut, enlève 12% en haut et 12% en bas.
+    
+    Args:
+        image_path: Chemin vers l'image originale
+        output_path: Chemin où sauvegarder l'image rognée
+        top_percent: Pourcentage à rogner en haut (défaut: 12%)
+        bottom_percent: Pourcentage à rogner en bas (défaut: 12%)
+    
+    Returns:
+        Le chemin de l'image rognée
     """
     with Image.open(image_path) as img:
         width, height = img.size
