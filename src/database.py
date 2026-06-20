@@ -1,3 +1,9 @@
+"""
+Module de gestion de la base de données pour Porte-vue.
+
+Gère le stockage et la récupération des articles archivés.
+"""
+
 import sqlite3
 from datetime import datetime
 from contextlib import contextmanager
@@ -17,11 +23,11 @@ def get_db_connection():
 
 
 def init_db() -> None:
-    """Initialise la base de données avec la table recipes si elle n'existe pas."""
+    """Initialise la base de données avec la table articles si elle n'existe pas."""
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            CREATE TABLE IF NOT EXISTS recipes (
+            CREATE TABLE IF NOT EXISTS articles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 filename TEXT NOT NULL,
                 ocr_text TEXT,
@@ -32,37 +38,37 @@ def init_db() -> None:
         conn.commit()
 
 
-def save_recipe(filename: str, ocr_text: str, tags: str) -> int:
+def save_article(filename: str, ocr_text: str, tags: str) -> int:
     """
-    Enregistre une recette dans la base de données.
+    Enregistre un article dans la base de données.
     
     Args:
         filename: Chemin du fichier image
         ocr_text: Texte extrait par OCR
-        tags: Tags associés à la recette
+        tags: Tags associés à l'article
     
     Returns:
-        L'ID de la recette créée
+        L'ID de l'article créé
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO recipes (filename, ocr_text, tags, created_at)
+            INSERT INTO articles (filename, ocr_text, tags, created_at)
             VALUES (?, ?, ?, ?)
         ''', (filename, ocr_text, tags, datetime.now()))
         conn.commit()
         return cursor.lastrowid
 
 
-def get_all_recipes(search_query: str = "") -> list:
+def get_all_articles(search_query: str = "") -> list:
     """
-    Récupère toutes les recettes, optionnellement filtrées par un terme de recherche.
+    Récupère tous les articles, optionnellement filtrés par un terme de recherche.
     
     Args:
-        search_query: Terme de recherche optionnel pour filtrer les recettes
+        search_query: Terme de recherche optionnel pour filtrer les articles
     
     Returns:
-        Liste des recettes correspondant aux critères
+        Liste des articles correspondant aux critères
     """
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -70,14 +76,14 @@ def get_all_recipes(search_query: str = "") -> list:
         if search_query:
             cursor.execute('''
                 SELECT id, filename, ocr_text, tags, created_at 
-                FROM recipes 
+                FROM articles 
                 WHERE ocr_text LIKE ? OR tags LIKE ?
                 ORDER BY created_at DESC
             ''', (f'%{search_query}%', f'%{search_query}%'))
         else:
             cursor.execute('''
                 SELECT id, filename, ocr_text, tags, created_at 
-                FROM recipes 
+                FROM articles 
                 ORDER BY created_at DESC
             ''')
             
